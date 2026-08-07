@@ -1,0 +1,1285 @@
+{
+  "name": "'The Automation Digest' weekly newsletter automation",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6b4d9f2a-1c3e-4f7a-9d2b-8e5a6c1f4b30",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5ba82c44-e498-42e2-8ae0-4a82ccc8ebbe",
+      "name": "If Stories Selected?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5168,
+        3872
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "printabdullah285@gmail.com",
+        "subject": "⚠️ The Automation Digest — no stories selected this week",
+        "emailType": "text",
+        "message": "=Heads up — this week's run of \"The Automation Digest\" stopped early.\n\nThe news API returned candidate stories and they passed the niche/category and duplicate checks, but the \"Select Useful Stories\" AI agent marked every single one of them as not useful (include_in_newsletter: false). With nothing left after filtering, no newsletter was generated and no emails were sent to subscribers.\n\nRun time: {{ $now.toFormat(\"cccc, dd LLLL yyyy, hh:mm:ss a\") }}\n\nWorth checking the Select Useful Stories agent's prompt/criteria — this usually means it's being too strict, or this week's news genuinely had nothing that qualified.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b9ee92f2-70de-4bdb-be32-51317ff7c6f0",
+      "name": "Notify No Stories Selected",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        5392,
+        4128
+      ],
+      "webhookId": "c1fbf444-bc13-426f-ba24-b5f3564ef4a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "drQCoQ4aGOJG18eg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Newsletter generation stopped: every candidate story was marked include_in_newsletter: false by the Select Useful Stories agent, leaving zero stories after filtering for this week's run."
+      },
+      "id": "fada5d9a-181d-4b34-98f2-0b01f90242c4",
+      "name": "Stop and Error (No Stories Selected)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        5760,
+        4128
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"id\": \"\",\n  \"include_in_newsletter\": true\n}"
+      },
+      "id": "9973d5dc-ffba-473a-9bb0-9212a30f2bc2",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        4512,
+        4000
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "id": "57f60051-2b05-4770-bc1b-b0d24c19b87f",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        5616,
+        3744
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "97b644fd-8ecd-40cd-9740-a68ea4a724e8",
+      "name": "Autofix Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        5824,
+        3952
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.data",
+        "options": {}
+      },
+      "id": "b6aa0fe1-3906-477d-861c-38cfe13058be",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3024,
+        3792
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "id": "ec747c75-29e9-4b6f-8d46-c45c281415ec",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        6128,
+        3952
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "3ef33c7d-4a68-4cae-8f08-ee7939a52e69",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        4384,
+        4000
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                4
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "7faaf581-30a2-4fdf-b900-35590c14528c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        4336
+      ],
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "url": "https://frontofai.com/api/briefing/v1/stories",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "30"
+            },
+            {
+              "name": "min_impact",
+              "value": "7"
+            },
+            {
+              "name": "sort",
+              "value": "latest"
+            },
+            {
+              "name": "category",
+              "value": "model-releases"
+            },
+            {
+              "name": "category",
+              "value": "tools-repos"
+            },
+            {
+              "name": "category",
+              "value": "breakthroughs"
+            },
+            {
+              "name": "category",
+              "value": "opinion-insight"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "ce8ebd43-180b-44c4-83df-8b8bf14795e8",
+      "name": "Fetch News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2576,
+        3968
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f59e0485-3a3e-4a5a-b126-94b16b2e6f68",
+              "leftValue": "={{ $json.body.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8a832fa3-67fb-4c84-b238-a86d02145a36",
+      "name": "If data exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2800,
+        3968
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "printabdullah285@gmail.com",
+        "subject": "⚠️ The Automation Digest — no newsletter data this week",
+        "emailType": "text",
+        "message": "=Heads up — this week's run of \"The Automation Digest\" stopped early.\n\nThe news API returned no usable article data (body.data was empty or missing), so no newsletter was generated and no emails were sent to subscribers.\n\nRun time: {{ $now.toFormat(\"cccc, dd LLLL yyyy, hh:mm:ss a\") }}\n\nWorth checking the API directly to see if this is a temporary outage or a response-format change.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a3677999-c75c-48aa-a7c8-e2a5e355e4e9",
+      "name": "Notify No Data",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3024,
+        3984
+      ],
+      "webhookId": "baa483aa-050d-4e2d-982d-87fa287c9abc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "drQCoQ4aGOJG18eg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allowedCategories = new Set([\n  \"model-releases\",\n  \"tools-repos\",\n  \"breakthroughs\",\n  \"opinion-insight\"\n]);\n\nreturn items\n  .filter(item => {\n    const categories = item.json.category_details || [];\n\n    // Require ALL category slugs to be in the allowed list\n    return (\n      categories.length > 0 &&\n      categories.every(category => allowedCategories.has(category.slug))\n    );\n  })\n  .map(item => ({\n    json: {\n      id: item.json.id,\n      source: item.json.source_url,\n      title: item.json.title,\n      summary_extended: item.json.summary_extended,\n      category_details: item.json.category_details.map(category => ({\n        slug: category.slug\n      }))\n    }\n  }));"
+      },
+      "id": "10d2c468-6881-4875-90e8-61c5fb811492",
+      "name": "Select Niche Stories",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3248,
+        3792
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Newsletter generation stopped: the news API returned no article data (body.data was empty or missing) for this week's run."
+      },
+      "id": "a7001f39-ee6d-4e7a-b7cc-cae52ea009ad",
+      "name": "Stop and Error [No Data]",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        3248,
+        3984
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8",
+          "mode": "list",
+          "cachedResultName": "The Automation Digest Subscribers List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 340354146,
+          "mode": "list",
+          "cachedResultName": "Story Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit#gid=340354146"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "id": "51ed69b7-6411-4549-a148-77d705a31a0a",
+      "name": "Get Published Story History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3248,
+        4176
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "djWr3MvzTw1uxrsn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "f7d2a7e9-f82a-4605-9249-7e111ba1be01",
+      "name": "Merge Stories with History",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3472,
+        4064
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Removes duplicate stories BEFORE the Rate Limiter / AI curation step —\n// the \"Select Useful Stories\" agent only ever sees one story at a time and\n// has no way to spot duplicates itself, so this has to happen upstream of it.\n\n// This node's single input is a MERGE of two sources (via \"Merge Stories with\n// History\", Append mode): candidate stories from \"Select Niche Stories\"\n// (shape: { id, title, ... }) and history rows from \"Get Published Story\n// History\" (shape: { StoryID, Title, PublishedAt }). Separate them by shape\n// below, since they arrive as one combined list.\n\nfunction normalize(title) {\n  return (title || \"\")\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, \" \")\n    .trim();\n}\n\nconst allItems = $input.all();\nconst historyRows = allItems.filter(item => item.json.StoryID !== undefined);\nconst candidates = allItems.filter(item => item.json.StoryID === undefined);\n\n// Build the set of already-published stories from the history log.\nconst publishedIds = new Set();\nconst publishedTitles = new Set();\n\nfor (const row of historyRows) {\n  const id = row.json.StoryID;\n  const title = row.json.Title;\n\n  if (id !== undefined && id !== null && id !== \"\") {\n    publishedIds.add(String(id));\n  }\n\n  if (title) {\n    publishedTitles.add(normalize(title));\n  }\n}\n\n// Walk this week's candidate stories, dropping in-batch AND cross-week duplicates.\nconst seenIdsThisRun = new Set();\nconst seenTitlesThisRun = new Set();\nconst unique = [];\n\nfor (const item of candidates) {\n  const story = item.json;\n  const idKey =\n    story.id !== undefined && story.id !== null\n      ? String(story.id)\n      : null;\n  const titleKey = normalize(story.title);\n\n  const isDuplicateInBatch =\n    (idKey && seenIdsThisRun.has(idKey)) ||\n    seenTitlesThisRun.has(titleKey);\n\n  const isAlreadyPublished =\n    (idKey && publishedIds.has(idKey)) ||\n    publishedTitles.has(titleKey);\n\n  if (isDuplicateInBatch || isAlreadyPublished) {\n    continue; // skip: duplicate this week, or already covered in a past issue\n  }\n\n  if (idKey) seenIdsThisRun.add(idKey);\n  seenTitlesThisRun.add(titleKey);\n  unique.push(item);\n}\n\n// If nothing remains after duplicate removal, return a flag instead.\nif (unique.length === 0) {\n  return [\n    {\n      json: {\n        new_stories: false,\n      },\n    },\n  ];\n}\n\n// Add the flag to every remaining unique story.\nreturn unique.map(item => ({\n  json: {\n    ...item.json,\n    new_stories: true,\n  },\n}));"
+      },
+      "id": "274b170a-bdfd-410d-ba52-91d9166305b0",
+      "name": "Remove Duplicate Stories",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3696,
+        4064
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "mode": "fixedDelay",
+        "delay": 2000
+      },
+      "id": "3eb5f723-a40b-4847-97e6-91df85586902",
+      "name": "Rate Limiter",
+      "type": "@divyanshu007/n8n-nodes-ratelimiter.rateLimiter",
+      "typeVersion": 1,
+      "position": [
+        4144,
+        3872
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=IDENTITY\nYou are the Content Curation Analyst for The Automation Digest. You are given exactly ONE story per run. Your only function is to decide whether this single story is substantial and useful enough to include in this week's issue.\n\nYou do not write copy, summarize, explain your reasoning, or re-check category or niche eligibility. A deterministic filter upstream has already confirmed every story belongs to an approved category.\n\nYou have no visibility into any other story in this week's batch. Evaluate only the story provided. Do not compare it to other stories. Ignore any pre-trained knowledge about the companies, tools, or people mentioned. Judge the story only by the fields in the input. If a fact is not present in the input, it does not exist.\n\nINPUT SCHEMA\n{\n  \"id\": \"string or number\",\n  \"source\": \"string\",\n  \"title\": \"string\",\n  \"summary_extended\": \"string\",\n  \"category_details\": [{\"slug\": \"string\"}]\n}\n\nTHIS WEEK'S ACTUAL INPUT DATA (use literally)\n{{ JSON.stringify($json) }}\n\nOUTPUT SCHEMA (strict JSON only — no prose, no explanations, no markdown)\n{\n  \"id\": \"<echoed verbatim as a string>\",\n  \"include_in_newsletter\": true | false\n}\n\nEXECUTION STEPS\n\nStep 1 — Read `title` and `summary_extended` exactly as provided.\n\nStep 2 — Validate Input:\nIf `title` is missing or empty, OR `summary_extended` is missing or empty, OR `category_details` is missing or an empty array:\n- Return:\n{\"id\":\"<echoed id as a string>\",\"include_in_newsletter\":false}\n- Stop.\n\nStep 3 — Substance Check:\nIf `summary_extended` is under roughly 40 characters, OR merely repeats the title without adding meaningful information:\n- Set `include_in_newsletter` to `false`.\n\nStep 4 — Usefulness Check:\nSet `include_in_newsletter` to `true` only if the story describes a concrete, specific development such as:\n- a shipped feature\n- a released model or tool\n- a measurable benchmark or result\n- a specific funding, acquisition, partnership, or strategic move with concrete details\n- another actionable development relevant to readers building with AI or automation\n\nOtherwise set `include_in_newsletter` to `false`, including for:\n- promotional language without concrete details\n- vague announcements\n- opinion pieces without supporting specifics\n- rehashed news with no new information\n\nStep 5 — Return exactly this JSON object and nothing else:\n{\n  \"id\": \"<echoed verbatim as a string>\",\n  \"include_in_newsletter\": true | false\n}\n\nRULES\n- Output valid JSON only.\n- Output exactly two fields: `id` and `include_in_newsletter`.\n- Do not output any additional fields.\n- Do not explain your decision.\n- Preserve the input `id` value verbatim, converting it to a JSON string if necessary.\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "ef2a8ae1-b3e7-4107-9354-887c1aa5bb39",
+      "name": "Classify Niche Stories",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4368,
+        3776
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"subject_line\": \"\",\n  \"intro\": \"\",\n  \"sections\": [\n    {\n      \"category\": \"\",\n      \"section_title\": \"\",\n      \"stories\": [\n        {\n          \"headline\": \"\",\n          \"blurb\": \"\",\n          \"why_it_matters\": \"\",\n          \"source\": \"\"\n        }\n      ]\n    }\n  ],\n  \"sign_off\": \"\"\n}",
+        "autoFix": true
+      },
+      "id": "f4bbaaac-478b-404e-b2e9-9655e08ddc64",
+      "name": "Structured Output Parser2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        5744,
+        3744
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// The Useful Stories Picker (AI agent) is only trusted for its decision.\n// The real story data is carried forward from the clean upstream source\n// (Rate Limiter), matched by id, because the agent echoes nested fields\n// (like category_details) unreliably.\nconst cleanItems = $('Rate Limiter').all().map(i => i.json);\nconst cleanById = {};\nfor (const c of cleanItems) { cleanById[c.id] = c; }\n\nreturn $input.all().map((item, idx) => {\n  const raw = item.json || {};\n  const decision = raw.output ? raw.output : raw;\n  const clean = cleanById[decision.id] || cleanItems[idx] || {};\n  return {\n    json: {\n      id: clean.id,\n      source: clean.source,\n      title: clean.title,\n      summary_extended: clean.summary_extended,\n      category_details: clean.category_details,\n      include_in_newsletter: decision.include_in_newsletter === true\n    }\n  };\n});"
+      },
+      "id": "7dbc45c4-5ee2-460a-973b-720b84710b76",
+      "name": "Get Classified Stories by ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4720,
+        3872
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "814e01f9-4e18-4d0f-aa9c-416e5bbd79c9",
+              "leftValue": "={{ $json.include_in_newsletter }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "23b91b43-8737-4180-a1c2-fb89130742c0",
+      "name": "Filter by include_in_newsletter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        4944,
+        3872
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "stories",
+        "options": {}
+      },
+      "id": "ce882ba7-2d7b-451e-86c9-bd5a1856c8f6",
+      "name": "Combine into Single Object",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        5392,
+        3728
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8",
+          "mode": "list",
+          "cachedResultName": "The Automation Digest Subscribers List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 340354146,
+          "mode": "list",
+          "cachedResultName": "Story Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit#gid=340354146"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "StoryID": "={{ $json.id }}",
+            "Title": "={{ $json.title }}",
+            "PublishedAt": "={{ $now.toFormat(\"cccc, dd LLLL yyyy, hh:mm:ss a\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "StoryID",
+              "displayName": "StoryID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PublishedAt",
+              "displayName": "PublishedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "21db0318-0f0c-4b87-9fce-346901867d33",
+      "name": "Log Published Stories",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5392,
+        3920
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "djWr3MvzTw1uxrsn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=IDENTITY\nYou are the Newsletter Copy Formatter for The Automation Digest. Your only function is to turn a batch of already-approved stories into the structured content skeleton of this week's issue: a subject line, an intro, stories grouped into sections by category, and a sign-off placeholder. You are not writing the final polished, humanized prose — a separate agent handles that afterward.\n\nIgnore all pre-trained knowledge about the companies, models, or tools named in the input. Do not add any fact, statistic, comparison, or claim that is not present in a story's `summary_extended` field. If a detail is not in the input, it does not exist and must not appear in your output.\n\nDo not use hedging or speculative language (\"reportedly\", \"could mean\", \"some say\") unless that exact qualifier already exists in the source `summary_extended` text.\n\nINPUT SCHEMA (shape of the data)\n{\n  \"stories\": [\n    {\n      \"id\": \"string or number\",\n      \"source\": \"string\",\n      \"title\": \"string\",\n      \"summary_extended\": \"string\",\n      \"category_details\": [{\"slug\": \"string\"}]\n    }\n  ]\n}\n\nTHIS WEEK'S ACTUAL INPUT DATA (this is real, use it literally — not the shape above)\n{{ JSON.stringify($json) }}\n\nFIXED CATEGORY-TO-SECTION MAP (use these exact labels, do not invent new ones):\n\"model-releases\" → \"Model Releases\"\n\"tools-repos\" → \"Tools & Repos\"\n\"breakthroughs\" → \"Breakthroughs\"\n\"opinion-insight\" → \"Opinion & Insight\"\n\nMULTI-CATEGORY RULE: a story may carry more than one slug in `category_details`. Assign it to exactly one section — the one matching the FIRST slug in its `category_details` array. Do not place the same story in two sections, and do not average or merge categories.\n\nOUTPUT SCHEMA (strict JSON only — no prose, no markdown fences, no commentary)\n{\n  \"subject_line\": \"string\",\n  \"intro\": \"string\",\n  \"sections\": [\n    {\n      \"category\": \"string\",\n      \"section_title\": \"string\",\n      \"stories\": [\n        {\"headline\": \"string\", \"blurb\": \"string\", \"why_it_matters\": \"string\", \"source\": \"string\"}\n      ]\n    }\n  ],\n  \"sign_off\": \"string\"\n}\n\nEXECUTION STEPS (perform every step, every run, in order)\nStep 1 — Fact Extraction: For every story in `stories`, extract `title`, `summary_extended`, `source`, `category_details` exactly as given.\nStep 2 — Section Assignment: For each story, read `category_details[0].slug` and map it to a section using the Fixed Category-to-Section Map. Bucket the story into that section only.\nStep 3 — Prune Empty Sections: IF a section ends up with zero stories, THEN omit it entirely from the output — never output an empty section.\nStep 4 — Per-Story Transform: For each story, produce:\n  - `headline`: the `title`, lightly tightened for readability if needed, no new facts added or changed.\n  - `blurb`: 2–3 sentences built only from the `summary_extended` field's content.\n  - `why_it_matters`: exactly one sentence, directly inferable from `summary_extended` — no speculation beyond it.\n  - `source`: the `source` field, unmodified.\nStep 5 — Compose Intro: Write 2–3 sentences summarizing the issue, based only on the counted number of stories and sections from Step 3 — do not invent a narrative theme not supported by the actual content.\nStep 6 — Compose Subject Line: Base it on the first story in the first non-empty section, in category priority order (Model Releases → Tools & Repos → Breakthroughs → Opinion & Insight).\nStep 7 — Compose Sign-Off: Use a short, neutral placeholder closing line — the next agent will personalize it. Do not sign it with a name yourself.\nStep 8 — Assemble Output: Return the full JSON exactly per the Output Schema. Do not add extra keys, do not omit required keys even if a section is empty (an empty `sections` array is valid; a missing `sections` key is not).\n\nFALLBACK TRIGGER\nFailure conditions: `stories` is missing, not an array, or empty.\nOn failure, do not invent a placeholder story to avoid an empty issue. Output exactly this and stop:\n{\"subject_line\": \"\", \"intro\": \"\", \"sections\": [], \"sign_off\": \"\", \"status\": \"NO_CONTENT_AVAILABLE\"}\n\n<example_success>\nInput: 3 stories — one with category_details [{\"slug\":\"model-releases\"}], two with category_details starting with {\"slug\":\"tools-repos\"}.\nOutput:\n{\n  \"subject_line\": \"This week: a new model release and two fresh tools worth a look\",\n  \"intro\": \"One model release and two tool drops made the cut this week...\",\n  \"sections\": [\n    {\"category\": \"model-releases\", \"section_title\": \"Model Releases\", \"stories\": [ /* 1 story object */ ]},\n    {\"category\": \"tools-repos\", \"section_title\": \"Tools & Repos\", \"stories\": [ /* 2 story objects */ ]}\n  ],\n  \"sign_off\": \"That's it for this week.\"\n}\n</example_success>\n\n<example_failure>\nInput:\n{\"stories\": []}\nOutput:\n{\"subject_line\": \"\", \"intro\": \"\", \"sections\": [], \"sign_off\": \"\", \"status\": \"NO_CONTENT_AVAILABLE\"}\n</example_failure>",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "f92866a3-bfdb-46c0-999d-d2c0c0a53052",
+      "name": "Build Newsletter",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        5648,
+        3520
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=IDENTITY\nYou are Layla Hassan, founder and sole writer of The Automation Digest, personally rewriting this week's draft before it goes out to your subscribers. Your only function is to take the structured draft you're given and rewrite it into the final email — sharp, human, direct, in your own voice. Nothing about this email should read as AI-generated, templated, or corporate.\n\nIgnore all pre-trained knowledge about the companies, tools, or people mentioned in the draft. Do not add a single fact, number, or claim that isn't already present in the input. Every fact in the input (source names, category labels, figures) is locked and must survive into your rewrite unchanged — only the wording, structure, and tone are yours to change.\n\nDo not narrate what you're doing (\"here's your humanized newsletter\", \"I've rewritten this to sound more personal\"). You are not commenting on the task. You are writing the email.\n\nINPUT SCHEMA\n{\n  \"subject_line\": \"string\",\n  \"intro\": \"string\",\n  \"sections\": [\n    {\"category\": \"string\", \"section_title\": \"string\", \"stories\": [{\"headline\": \"string\", \"blurb\": \"string\", \"why_it_matters\": \"string\", \"source\": \"string\"}]}\n  ],\n  \"sign_off\": \"string\"\n}\n\nTHIS WEEK'S ACTUAL INPUT DATA (this is real, use it literally — not the shape above)\n{{ JSON.stringify($json) }}\n\nOUTPUT SCHEMA (strict JSON only — no prose outside the JSON, no markdown fences, no explanation)\n{\n  \"subject\": \"string\",\n  \"body\": \"string\"\n}\n\nEXECUTION STEPS (perform every step, every run, in order — the self-check in Step 7 is mandatory, never skip it)\nStep 1 — Fact Lock: Extract every factual element from the input (names, source attributions, category groupings, figures). These are immutable. Everything else is rewritable.\nStep 2 — Subject Line: Rewrite `subject_line` into `subject` — punchy, specific, under 60 characters. No generic framing like \"This week in AI\".\nStep 3 — Opening: Rewrite `intro` into 2–4 short lines, first person, as Layla. Open with the most interesting fact of the week, not a greeting. No \"Hope you're doing well\" filler, no rhetorical-question openers.\nStep 4 — Section Rewrite: For each section, keep `section_title` as a short label. For each story, compress `headline` + `blurb` + `why_it_matters` into 3–5 tight sentences: first line states the news, next 1–2 lines state why it matters to a reader in this space. Credit the source naturally inline (e.g. \"via source_url\") — never fabricate a URL, since none exists in the input.\nStep 5 — Line Mechanics (apply across the entire body):\n  - Average sentence length under ~18 words.\n  - Max 2–3 lines per paragraph; use frequent single-line paragraphs so the reader scrolls, not skims.\n  - Zero em dashes (—) anywhere. Replace with a period or comma.\n  - Zero filler/AI-tell words or phrases: \"delve\", \"leverage\", \"unlock\", \"landscape\", \"game changer\", \"in today's fast-paced world\", \"at the end of the day\", \"it's worth noting\", \"unpack\".\n  - Zero hedging that isn't in the source facts: \"might\", \"could potentially\", \"seems to\".\n  - Every paragraph must earn its place — if removing it loses no information, cut it.\nStep 6 — Sign-Off: Rewrite `sign_off` into 1–2 personal lines, signed \"— Layla\". No corporate closing lines.\nStep 7 — Self-Check (mandatory): Re-read your own draft. IF any em dash, banned filler word, fabricated link, or paragraph longer than 3 lines remains, THEN fix it before output.\nStep 8 — Assemble Output: Combine `subject` and the full rewritten body text into the Output Schema exactly.\n\nFALLBACK TRIGGER\nFailure conditions: input is missing `subject_line`/`intro`/`sections`, OR `sections` is an empty array, OR an upstream `status` field reads `\"NO_CONTENT_AVAILABLE\"`.\nOn failure, output exactly this and stop:\n{\"subject\": \"\", \"body\": \"\", \"status\": \"NOTHING_TO_HUMANIZE\"}\n\n<example_failure>\nInput:\n{\"subject_line\": \"\", \"intro\": \"\", \"sections\": [], \"sign_off\": \"\", \"status\": \"NO_CONTENT_AVAILABLE\"}\nOutput:\n{\"subject\": \"\", \"body\": \"\", \"status\": \"NOTHING_TO_HUMANIZE\"}\n</example_failure>s",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "8ddf6d9b-9ebb-490a-9fb9-48ab762de31b",
+      "name": "NewsLetter Humanizer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        6112,
+        3728
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"subject\": \"\",\n  \"body\": \"\"\n}"
+      },
+      "id": "0705c96b-9f48-4695-b287-c14986fca66e",
+      "name": "Structured Output Parser3",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        6256,
+        3952
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs exactly ONCE per execution — the newsletter content (subject + body)\n// is generated a single time and is NOT regenerated or re-fetched per subscriber.\nconst { subject, body } = $('NewsLetter Humanizer').first().json.output;\n\nlet html = (body || \"\").trim();\n\n// If the AI returned plain text instead of HTML, convert it into email-safe HTML.\nconst looksLikeHtml = /<(div|p|h1|h2|h3|hr|br|ul|ol|li|strong|em)\\b/i.test(html);\n\nif (!looksLikeHtml) {\n  html = html\n    .replace(/\\r\\n/g, \"\\n\")\n    .replace(/\\n---\\n/g, \"<hr>\")\n    .replace(/\\n\\n+/g, \"</p><p>\")\n    .replace(/\\n/g, \"<br>\");\n\n  html = `\n<div style=\"font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222222;\">\n  <p>${html}</p>\n</div>`;\n}\n// If the AI already returned HTML, it is left completely untouched here —\n// the personalized greeting is inserted later, once per subscriber.\n\n// A single shared newsletter object. Subscriber-specific personalization\n// (the greeting) is applied downstream, after this is merged with the\n// subscriber list — it is NOT applied here.\nreturn [\n  {\n    json: {\n      subject,\n      html\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6464,
+        3728
+      ],
+      "id": "fc0292f0-1376-4833-9df3-f4f02e448188",
+      "name": "Format Newsletter HTML"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "f5b8b453-cf3d-4f91-889d-4baf4d3af134",
+      "name": "Merge Newsletter with Subscribers",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        6688,
+        4048
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8",
+          "mode": "list",
+          "cachedResultName": "The Automation Digest Subscribers List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11vb4cU0eMku66Io1ffo2U-GCdr4W-wSc9k03NrP_Os8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "id": "7cfaf7f4-c847-405e-ab2b-c9552ddb444f",
+      "name": "Get Subscribers List",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        6464,
+        4320
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "djWr3MvzTw1uxrsn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Runs once per subscriber item (n8n's native per-item execution model).\n// Every subscriber gets their OWN greeting, inserted into their OWN copy\n// of the shared newsletter HTML produced by \"Format Newsletter HTML\".\nconst firstName = $json.Name || \"there\";\nlet html = $json.html;\n\nconst greeting = `\n<p>Hey ${firstName}, How's it going? 😊</p>\n`;\n\n// Insert the greeting immediately after the opening wrapper <div>.\n// If there's no wrapper div, prepend the greeting instead.\nif (/<div[^>]*>/i.test(html)) {\n  html = html.replace(/(<div[^>]*>)/i, `$1${greeting}`);\n} else {\n  html = greeting + html;\n}\n\nreturn {\n  json: {\n    Name: $json.Name,\n    Email: $json.Email,\n    subject: $json.subject,\n    html\n  }\n};"
+      },
+      "id": "05409570-f63f-4cc8-8e9c-a4d702bc4d0f",
+      "name": "Add Personalized Greeting",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6912,
+        4048
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Layla Hassan"
+        }
+      },
+      "id": "d6f0cb7a-a5f0-4954-9641-a1cac72d6ca7",
+      "name": "Send Newsletter",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        7136,
+        4048
+      ],
+      "webhookId": "ee705457-7785-4577-b878-5d8b734a8b51",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "drQCoQ4aGOJG18eg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mangomeen285@gmail.com",
+        "subject": "📜 The Automation Digest — how many stories included this week ?",
+        "emailType": "text",
+        "message": "=Hi,\n\nThis week's edition of The Automation Digest has been prepared successfully.\n\nA total of {{ $('Log Published Stories').all().length }} stor{{ $('Log Published Stories').all().length === 1 ? 'y has' : 'ies have' }} been included in this week's newsletter.\n\nNewsletter went out at: {{ $now.toFormat(\"cccc, dd LLLL yyyy, hh:mm:ss a\") }}\n\nBest,\nThe Automation Digest",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e1277f26-9e6f-4f24-b928-c43cf5e65dae",
+      "name": "Notify Client about story count",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        7360,
+        4048
+      ],
+      "webhookId": "c1fbf444-bc13-426f-ba24-b5f3564ef4a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "drQCoQ4aGOJG18eg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "945c8f9b-3f41-44b6-b1b6-ac0c09e1b29b",
+              "leftValue": "={{ $json.new_stories }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3920,
+        4064
+      ],
+      "id": "bd6e3ec9-30bf-45d6-8290-bc08ad142ea8",
+      "name": "If New Stories ?"
+    },
+    {
+      "parameters": {
+        "sendTo": "printabdullah285@gmail.com",
+        "subject": "⚠️ The Automation Digest — no new stories (all duplicates)",
+        "emailType": "text",
+        "message": "=Heads up — this week's run of \"The Automation Digest\" stopped early.\n\nNo stories were available after the \"Remove Duplicate Stories\" step, so the workflow exited before newsletter generation.\n\nThis can happen if:\n- Every story returned by the News API was already covered in previous newsletters (duplicates).\n- The News API returned stories outside the configured niche/category, leaving nothing after filtering.\n- The News API returned no stories at all.\n\nAs a result, no newsletter was generated and no emails were sent to subscribers.\n\nRun time: {{ $now.toFormat(\"cccc, dd LLLL yyyy, hh:mm:ss a\") }}\n\nWorth checking the News API response and the filtering logic to determine why no stories remained after the duplicate removal stage.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4385a5e6-7129-4d78-9d3d-fdbc0ebf6bb9",
+      "name": "Notify No New Stories",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        4144,
+        4176
+      ],
+      "webhookId": "c1fbf444-bc13-426f-ba24-b5f3564ef4a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "drQCoQ4aGOJG18eg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Newsletter generation stopped: every candidate story was marked include_in_newsletter: false by the Select Useful Stories agent, leaving zero stories after filtering for this week's run."
+      },
+      "id": "fc143326-f4fa-4b0e-bbfa-4e36edc69d63",
+      "name": "Stop and Error (No New Stories)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4432,
+        4176
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If Stories Selected?": {
+      "main": [
+        [
+          {
+            "node": "Combine into Single Object",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Published Stories",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify No Stories Selected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify No Stories Selected": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error (No Stories Selected)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Classify Niche Stories",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Build Newsletter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autofix Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Select Niche Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "NewsLetter Humanizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify Niche Stories",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Subscribers List",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Published Story History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch News": {
+      "main": [
+        [
+          {
+            "node": "If data exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If data exists?": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify No Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify No Data": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error [No Data]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Niche Stories": {
+      "main": [
+        [
+          {
+            "node": "Merge Stories with History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Published Story History": {
+      "main": [
+        [
+          {
+            "node": "Merge Stories with History",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Stories with History": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicate Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicate Stories": {
+      "main": [
+        [
+          {
+            "node": "If New Stories ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limiter": {
+      "main": [
+        [
+          {
+            "node": "Classify Niche Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Niche Stories": {
+      "main": [
+        [
+          {
+            "node": "Get Classified Stories by ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Build Newsletter",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Classified Stories by ID": {
+      "main": [
+        [
+          {
+            "node": "Filter by include_in_newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by include_in_newsletter": {
+      "main": [
+        [
+          {
+            "node": "If Stories Selected?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine into Single Object": {
+      "main": [
+        [
+          {
+            "node": "Build Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Newsletter": {
+      "main": [
+        [
+          {
+            "node": "NewsLetter Humanizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NewsLetter Humanizer": {
+      "main": [
+        [
+          {
+            "node": "Format Newsletter HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "NewsLetter Humanizer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Newsletter HTML": {
+      "main": [
+        [
+          {
+            "node": "Merge Newsletter with Subscribers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Newsletter with Subscribers": {
+      "main": [
+        [
+          {
+            "node": "Add Personalized Greeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Subscribers List": {
+      "main": [
+        [
+          {
+            "node": "Merge Newsletter with Subscribers",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Personalized Greeting": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Published Stories": {
+      "main": [
+        []
+      ]
+    },
+    "If New Stories ?": {
+      "main": [
+        [
+          {
+            "node": "Rate Limiter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify No New Stories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify No New Stories": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error (No New Stories)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Newsletter": {
+      "main": [
+        [
+          {
+            "node": "Notify Client about story count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e3f6f2ae-20a6-42c7-82ed-28d659eedb44",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c33388d8ae3c28b3468d1f8c6c6441149b4062a6b974826a8924f3a6fde606d"
+  },
+  "nodeGroups": [],
+  "id": "4fRaInOLfVg2cBWD",
+  "tags": []
+}
